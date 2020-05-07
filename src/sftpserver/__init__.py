@@ -51,7 +51,14 @@ def start_server(host, port, keyfile, level):
     while True:
         conn, addr = server_socket.accept()
 
-        host_key = paramiko.RSAKey.from_private_key_file(keyfile)
+        if keyfile is None:
+            with tempfile.NamedTemporaryFile() as keyfile:
+                key = paramiko.RSAKey.generate(bits=1024)
+                key.write_private_key_file(keyfile.name)
+                host_key = paramiko.RSAKey.from_private_key_file(keyfile.name)
+        else:
+            host_key = paramiko.RSAKey.from_private_key_file(keyfile)
+
         transport = paramiko.Transport(conn)
         transport.add_server_key(host_key)
         transport.set_subsystem_handler(
@@ -90,13 +97,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.keyfile is None:
-        with tempfile.NamedTemporaryFile() as keyfile:
-            key = paramiko.RSAKey.generate(bits=1024)
-            key.write_private_key_file(keyfile.name)
-            start_server(args.host, args.port, keyfile.name, args.level)
-    else:
-        start_server(args.host, args.port, args.keyfile, args.level)
+    start_server(args.host, args.port, args.keyfile, args.level)
 
 
 if __name__ == '__main__':
