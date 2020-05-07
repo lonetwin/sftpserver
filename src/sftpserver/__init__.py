@@ -29,7 +29,6 @@ import socket
 import argparse
 import sys
 import textwrap
-import tempfile
 
 import paramiko
 
