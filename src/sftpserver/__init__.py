@@ -29,6 +29,7 @@ import socket
 import argparse
 import sys
 import textwrap
+import tempfile
 
 import paramiko
 
@@ -90,10 +91,12 @@ def main():
     args = parser.parse_args()
 
     if args.keyfile is None:
-        parser.print_help()
-        sys.exit(-1)
-
-    start_server(args.host, args.port, args.keyfile, args.level)
+        with tempfile.NamedTemporaryFile() as keyfile:
+            key = paramiko.RSAKey.generate(bits=1024)
+            key.write_private_key_file(keyfile.name)
+            start_server(args.host, args.port, keyfile.name, args.level)
+    else:
+        start_server(args.host, args.port, args.keyfile, args.level)
 
 
 if __name__ == '__main__':
