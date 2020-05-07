@@ -52,10 +52,7 @@ def start_server(host, port, keyfile, level):
         conn, addr = server_socket.accept()
 
         if keyfile is None:
-            with tempfile.NamedTemporaryFile() as keyfile:
-                key = paramiko.RSAKey.generate(bits=1024)
-                key.write_private_key_file(keyfile.name)
-                host_key = paramiko.RSAKey.from_private_key_file(keyfile.name)
+            host_key = paramiko.RSAKey.generate(bits=1024)
         else:
             host_key = paramiko.RSAKey.from_private_key_file(keyfile)
 
