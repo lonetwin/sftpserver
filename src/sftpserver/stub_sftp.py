@@ -29,11 +29,11 @@ class StubServer (ServerInterface):
     def check_auth_password(self, username, password):
         # all are allowed
         return AUTH_SUCCESSFUL
-        
+
     def check_auth_publickey(self, username, key):
         # all are allowed
         return AUTH_SUCCESSFUL
-        
+
     def check_channel_request(self, kind, chanid):
         return OPEN_SUCCEEDED
 
@@ -63,14 +63,14 @@ class StubSFTPServer (SFTPServerInterface):
     # assume current folder is a fine root
     # (the tests always create and eventualy delete a subfolder, so there shouldn't be any mess)
     ROOT = os.getcwd()
-        
+
     def _realpath(self, path):
         return self.ROOT + self.canonicalize(path)
 
     def list_folder(self, path):
         path = self._realpath(path)
         try:
-            out = [ ]
+            out = []
             flist = os.listdir(path)
             for fname in flist:
                 attr = SFTPAttributes.from_stat(os.stat(os.path.join(path, fname)))
@@ -212,3 +212,6 @@ class StubSFTPServer (SFTPServerInterface):
             else:
                 symlink = '<error>'
         return symlink
+
+
+ssh_server = StubServer()

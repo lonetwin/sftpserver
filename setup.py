@@ -11,25 +11,26 @@ Topic :: Internet :: File Transfer Protocol (FTP)
 Operating System :: Unix
 """
 
+
 def read(*rel_names):
     return open(os.path.join(os.path.dirname(__file__), *rel_names)).read()
 
 
 setup(
     name='sftpserver',
-    version='0.3',
-    url='http://github.com/rspivak/sftpserver',
+    version='0.5',
+    url='http://github.com/lonetwin/sftpserver',
     license='MIT',
-    description='sftpserver - a simple single-threaded sftp server',
-    author='Ruslan Spivak',
-    author_email='ruslan.spivak@gmail.com',
+    description='sftpserver - a skeletal SFTP server written using Paramiko',
+    author='Steven Fernandez',
+    author_email='steve@lonetwin.net',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     install_requires=['setuptools>=0.7', 'paramiko'],
     zip_safe=False,
     entry_points="""\
     [console_scripts]
-    sftpserver = sftpserver:main
+    sftpserver = sftpserver.__main__:main
     """,
     classifiers=filter(None, classifiers.split('\n')),
     long_description=read('README.rst'),

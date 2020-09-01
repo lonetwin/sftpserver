@@ -1,19 +1,16 @@
 sftpserver
 ==========
 
-``sftpserver`` is a simple single-threaded SFTP server based on
-Paramiko's SFTPServer.
+``sftpserver`` is a skeletal SFTP server written using `Paramiko`_
 
-I needed a simple server that could be used as a stub for testing
-Python SFTP clients so I whipped out one.
+This project exists to serve as a starting point / demonstration of how to build
+an SFTP server or as something to be used in tests. As such the goal is *not* to
+provide a full featured sftp server.
 
-
-Installation
-------------
-
-Using ``pip``::
-
-    $ [sudo] pip install sftpserver
+This was initially a simple fork of `@rspivak`'s `sftpserver`_, which in turn
+was an adaptation of the code from Paramiko's tests. However, I updated it
+further to demonstrate the use of different `threaded` and `forked` modes of
+operation.
 
 
 Examples
@@ -21,33 +18,31 @@ Examples
 
 ::
 
-    $ sftpserver
-    Usage: sftpserver [options]
-    -k/--keyfile should be specified
+    # run sftpserver with defaults (serving current dir, at
+    # localhost:3373, in threaded mode)
 
+    $ python -m sftpserver
 
-    Options:
-      -h, --help            show this help message and exit
-      --host=HOST           listen on HOST [default: localhost]
-      -p PORT, --port=PORT  listen on PORT [default: 3373]
-      -l LEVEL, --level=LEVEL
-                            Debug level: WARNING, INFO, DEBUG [default: INFO]
-      -k FILE, --keyfile=FILE
-                            Path to private key, for example /tmp/test_rsa.key
+    # run sftpserver with defaults (serving dir /tmp, at
+    # localhost:3373, in forked mode, using server key /tmp/test_rsa.key)
 
-    $ sftpserver -k /tmp/test_rsa.key -l DEBUG
+    $ sftpserver -r /tmp -k /tmp/test_rsa.key -l DEBUG -m forked
 
 
 Generating a test private key::
 
     $ openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout /tmp/test_rsa.key
 
-Connecting with a Python client to our server:
+Connecting with a Python client to our server::
 
->>> import paramiko
->>> pkey = paramiko.RSAKey.from_private_key_file('/tmp/test_rsa.key')
->>> transport = paramiko.Transport(('localhost', 3373))
->>> transport.connect(username='admin', password='admin', pkey=pkey)
->>> sftp = paramiko.SFTPClient.from_transport(transport)
->>> sftp.listdir('.')
-['loop.py', 'stub_sftp.py']
+    >>> import paramiko
+    >>> pkey = paramiko.RSAKey.from_private_key_file('/tmp/test_rsa.key')
+    >>> transport = paramiko.Transport(('localhost', 3373))
+    >>> transport.connect(username='admin', password='admin', pkey=pkey)
+    >>> sftp = paramiko.SFTPClient.from_transport(transport)
+    >>> sftp.listdir('.')
+    ['loop.py', 'stub_sftp.py']
+
+
+.. _Paramiko: https://www.paramiko.org/
+.. _sftpserver: https://github.com/rspivak/sftpserver
