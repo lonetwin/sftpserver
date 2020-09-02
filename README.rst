@@ -4,13 +4,13 @@ sftpserver
 ``sftpserver`` is a skeletal SFTP server written using `Paramiko`_
 
 This project exists to serve as a starting point / demonstration of how to build
-an SFTP server or as something to be used in tests. As such the goal is *not* to
+an SFTP server or as something to be used in tests. As such the goal is to *not*
 provide a full featured sftp server.
 
 This was initially a simple fork of `@rspivak`'s `sftpserver`_, which in turn
 was an adaptation of the code from Paramiko's tests. However, I updated it
 further to demonstrate the use of different `threaded` and `forked` modes of
-operation after Martin Haack reached out to be with some questions.
+operation after Martin Haack reached out to me with some questions.
 
 
 Installation
