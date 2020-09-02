@@ -99,8 +99,8 @@ def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL,
                 if os.geteuid() == 0:
                     user = pwd.getpwnam(transport.get_username())
                     logger.debug('Dropping privileges, will run as %s', user)
-                    os.setuid(user.pw_uid)
                     os.setgid(user.pw_gid)
+                    os.setuid(user.pw_uid)
             else:
                 transport.atfork()
                 os.waitpid(-1, 0)
