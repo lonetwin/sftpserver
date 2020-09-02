@@ -10,16 +10,22 @@ provide a full featured sftp server.
 This was initially a simple fork of `@rspivak`'s `sftpserver`_, which in turn
 was an adaptation of the code from Paramiko's tests. However, I updated it
 further to demonstrate the use of different `threaded` and `forked` modes of
-operation.
+operation after Martin Haack reached out to be with some questions.
+
+
+Installation
+------------
+::
+
+    $ pip install git+https://github.com/lonetwin/sftpserver.git@master
 
 
 Examples
 --------
-
 ::
 
     # run sftpserver with defaults (serving current dir, at
-    # localhost:3373, in threaded mode)
+    # localhost:3373, in threaded mode, with log level set to DEBUG)
 
     $ python -m sftpserver
 
