@@ -62,6 +62,14 @@ def setup_logging(level, mode):
     return logger
 
 
+def setup_transport(connection):
+    transport = paramiko.Transport(connection)
+    transport.add_server_key(StubSFTPServer.KEY)
+    transport.set_subsystem_handler('sftp', paramiko.SFTPServer, StubSFTPServer)
+    transport.start_server(server=ssh_server)
+    return transport
+
+
 def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL, mode=MODE):
     logger = setup_logging(level, mode)
 
@@ -71,6 +79,7 @@ def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL,
         server_key = paramiko.RSAKey.from_private_key_file(keyfile)
 
     StubSFTPServer.ROOT = root
+    StubSFTPServer.KEY = server_key
 
     logger.debug('Serving %s over sftp at %s:%s', root, host, port)
 
@@ -82,28 +91,30 @@ def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL,
     sessions = []
     while True:
         connection, _ = server_socket.accept()
-        transport = paramiko.Transport(connection)
-        transport.add_server_key(server_key)
-        transport.set_subsystem_handler('sftp', paramiko.SFTPServer, StubSFTPServer)
-
-        if mode == 'threaded':
-            logger.debug('Starting a new thread')
-            transport.start_server(server=ssh_server)
-            sessions.append(transport.accept())
-        elif mode == 'forked':
+        if mode == 'forked':
+            logger.debug('Starting a new process')
             pid = os.fork()
             if pid == 0:
-                logger.debug('Starting a new process')
-                transport.start_server(server=ssh_server)
-                sessions.append(transport.accept())
+                transport = setup_transport(connection)
+                channel = transport.accept()
                 if os.geteuid() == 0:
                     user = pwd.getpwnam(transport.get_username())
-                    logger.debug('Dropping privileges, will run as %s', user)
+                    logger.debug('Dropping privileges, will run as %s', user.pw_name)
                     os.setgid(user.pw_gid)
                     os.setuid(user.pw_uid)
+                transport.join()
+                logger.debug("session for %s has ended. Exiting", user.pw_name)
+                sys.exit()
             else:
-                transport.atfork()
-                os.waitpid(-1, 0)
+                sessions.append(pid)
+                pid, _ = os.waitpid(-1, os.WNOHANG)
+                if pid:
+                    sessions.remove(pid)
+        else:
+            logger.debug('Starting a new thread')
+            transport = setup_transport(connection)
+            channel = transport.accept()
+            sessions.append(channel)
 
         logger.debug('%s active sessions', len(sessions))
 
