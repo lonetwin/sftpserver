@@ -28,7 +28,11 @@ __author__ = 'Steven Fernandez <steve@lonetwin.net>'
 import argparse
 import logging
 import os
-import pwd
+try:
+    import pwd
+except ImportError:
+    pwd = None
+
 import socket
 import sys
 
@@ -98,10 +102,15 @@ def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL,
                 transport = setup_transport(connection)
                 channel = transport.accept()
                 if os.geteuid() == 0:
-                    user = pwd.getpwnam(transport.get_username())
-                    logger.debug('Dropping privileges, will run as %s', user.pw_name)
-                    os.setgid(user.pw_gid)
-                    os.setuid(user.pw_uid)
+                    if pwd is not None:
+                        user = pwd.getpwnam(transport.get_username())
+                        logger.debug('Dropping privileges, will run as %s', user.pw_name)
+                        os.setgid(user.pw_gid)
+                        os.setuid(user.pw_uid)
+                    else:
+                        logger.debug('Dropping privileges is not supported on this platform '
+                                     'will run as %s', os.getlogin())
+
                 transport.join()
                 logger.debug("session for %s has ended. Exiting", user.pw_name)
                 sys.exit()
