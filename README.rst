@@ -37,7 +37,7 @@ Examples
 
 Generating a test private key::
 
-    $ openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout /tmp/test_rsa.key
+    $ openssl genrsa -out server.key.pem 4096               # generate a private key
 
 Connecting with a Python client to our server::
 

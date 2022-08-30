@@ -26,6 +26,7 @@
 __author__ = 'Steven Fernandez <steve@lonetwin.net>'
 
 import argparse
+import getpass
 import logging
 import os
 import pwd
@@ -70,13 +71,13 @@ def setup_transport(connection):
     return transport
 
 
-def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, level=LOG_LEVEL, mode=MODE):
+def start_server(host=HOST, port=PORT, root=ROOT, keyfile=None, password=None, level=LOG_LEVEL, mode=MODE):
     logger = setup_logging(level, mode)
 
     if keyfile is None:
         server_key = paramiko.RSAKey.generate(bits=1024)
     else:
-        server_key = paramiko.RSAKey.from_private_key_file(keyfile)
+        server_key = paramiko.RSAKey.from_private_key_file(keyfile, password=password)
 
     StubSFTPServer.ROOT = root
     StubSFTPServer.KEY = server_key
@@ -139,6 +140,10 @@ def main():
         help='Path to private key, for example /tmp/test_rsa.key'
     )
     parser.add_argument(
+        '-P', '--password', help='Prompt for keyfile password', action="store_true"
+    )
+
+    parser.add_argument(
         '-r', '--root', dest='root', default=ROOT,
         help='Directory to serve as root for the server'
     )
@@ -153,7 +158,11 @@ def main():
         parser.print_help()
         sys.exit(-1)
 
-    start_server(args.host, args.port, args.root, args.keyfile, args.level, args.mode)
+    password = None
+    if args.password:
+        password = getpass.getpass("Password: ")
+
+    start_server(args.host, args.port, args.root, args.keyfile, password, args.level, args.mode)
 
 
 if __name__ == '__main__':
