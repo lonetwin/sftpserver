@@ -74,7 +74,7 @@ class StubSFTPServer (SFTPServerInterface):
             out = []
             flist = os.listdir(path)
             for fname in flist:
-                attr = SFTPAttributes.from_stat(os.stat(os.path.join(path, fname)))
+                attr = SFTPAttributes.from_stat(os.lstat(os.path.join(path, fname)))
                 attr.filename = fname
                 out.append(attr)
             return out
